@@ -17,9 +17,9 @@ size_t fill_kexinit(KEXINIT *kexinit) {
     char kex_algorithms[] = "curve25519-sha256";
     char server_host_key_algorithms[] = "rsa-sha2-512";
     char encryption_algorithms_client_to_server[] = "chacha20-poly1305@openssh.com";
-    char encryption_algorithms_server_to_client[] = "aes128-ctr,aes256-ctr";
-    char mac_algorithms_client_to_server[] = "hmac-sha1,hmac-sha256";
-    char mac_algorithms_server_to_client[] = "hmac-sha1,hmac-sha256";
+    char encryption_algorithms_server_to_client[] = "chacha20-poly1305@openssh.com";
+    char mac_algorithms_client_to_server[] = "umac-64-etm@openssh.com";
+    char mac_algorithms_server_to_client[] = "umac-64-etm@openssh.com";
     char compression_algorithms_client_to_server[] = "none";
     char compression_algorithms_server_to_client[] = "none";
 

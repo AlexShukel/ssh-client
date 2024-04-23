@@ -11,4 +11,8 @@ add_executable(ssh_client client.c
         kexinit.c
         kexinit.h
         utils.c
-        utils.h)
+        utils.h
+        dekexinit.h
+        dekexinit.c
+        dekexreply.h
+        dekexreply.c)
