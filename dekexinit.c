@@ -12,6 +12,4 @@ void fill_dekexinit(DEKEXINIT *dekexinit) {
     FILE *urand = fopen("/dev/urandom", "r");
     fread(dekexinit->ephemeral_key, 1, KEY_LEN, urand);
     fclose(urand);
-
-    printf("%32s\n", dekexinit->ephemeral_key);
 }

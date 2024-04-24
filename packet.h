@@ -24,6 +24,6 @@ typedef struct {
 
 size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte *mac);
 
-void parse_packet(const byte *buffer, Packet *packet);
+void deserialize_packet(const byte *buffer, Packet *packet);
 
 #endif //SSH_IMPLEMENTATION_PACKET_H

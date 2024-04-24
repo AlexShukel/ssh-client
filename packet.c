@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <netinet/in.h>
 #include "packet.h"
 #include "utils.h"
 
@@ -29,11 +30,16 @@ size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte 
     return total_length;
 }
 
-void parse_packet(const byte *buffer, Packet *packet) {
-    memcpy(packet, buffer, sizeof(Packet));
-    uint_to_little_endian(&packet->packet_length);
+void deserialize_packet(const byte *buffer, Packet *packet) {
+    packet->packet_length = htonl(*((uint32_t *) buffer));
+    memcpy(&packet->padding_length, buffer + sizeof(uint32_t), sizeof(byte));
 
     size_t payload_size = packet->packet_length - packet->padding_length - 1;
     packet->payload = malloc(payload_size);
-    memcpy(packet->payload, buffer + 5, payload_size);
+    memcpy(packet->payload, buffer + sizeof(uint32_t) + sizeof(byte), payload_size);
+
+    packet->random_padding = malloc(packet->padding_length);
+    memcpy(packet->random_padding, buffer + sizeof(uint32_t) + sizeof(byte) + payload_size, packet->padding_length);
+
+    // TODO: deserialize mac
 }

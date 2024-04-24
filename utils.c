@@ -24,14 +24,8 @@ bool starts_with(const char *str, const char *pattern, size_t pattern_size) {
     return true;
 }
 
-void uint_to_little_endian(uint32_t* value) {
-    *value = ((*value >> 24) & 0xff) |
-             ((*value << 8) & 0xff0000) |
-             ((*value >> 8) & 0xff00) |
-             ((*value << 24) & 0xff000000);
-}
-
 void send_data_in_packet(int s_socket, byte *data, size_t data_size) {
+    printf("Sending packet with data of size: %d\n", data_size);
     Packet packet;
     size_t packet_size = fill_packet(&packet, data, data_size, NULL);
 

@@ -60,7 +60,7 @@ void exchange_protocol_version(int s_socket) {
     }
 
     protocol_version[size] = '\0';
-    printf("Protocol version: %s", protocol_version);
+    printf("Protocol version: %s\n", protocol_version);
 
     if (!starts_with(protocol_version, "SSH-2.0", 7)) {
         close(s_socket);
@@ -72,7 +72,7 @@ void exchange_protocol_version(int s_socket) {
 void algorithm_negotiation(int s_socket) {
     KEXINIT kexinit_client;
     size_t kexinit_size = fill_kexinit(&kexinit_client);
-
+    // FIXME: serialize KEXINIT properly
     send_data_in_packet(s_socket, (byte *) &kexinit_client, kexinit_size);
 
     Packet server_packet;
@@ -84,10 +84,10 @@ void algorithm_negotiation(int s_socket) {
         exit(1);
     }
 
-    parse_packet(packet_buffer, &server_packet);
+    deserialize_packet(packet_buffer, &server_packet);
 
     KEXINIT kexinit_server;
-    parse_kexinit(server_packet.payload, &kexinit_server);
+    deserialize_KEXINIT(server_packet.payload, &kexinit_server);
 }
 
 void key_exchange(int s_socket) {
@@ -95,7 +95,11 @@ void key_exchange(int s_socket) {
     fill_dekexinit(&dekexinit);
     send_data_in_packet(s_socket, &dekexinit, sizeof(DEKEXINIT));
 
-
+    Packet dekex_reply_packet;
+    ssize_t size = recv(s_socket, packet_buffer, MAX_PACKET_SIZE, 0);
+    deserialize_packet(packet_buffer, &dekex_reply_packet);
+    printf("Size: %d\n", size);
+    printf("Packet length: %d\n", dekex_reply_packet.packet_length);
 }
 
 int main(int argc, char **argv) {
@@ -105,10 +109,10 @@ int main(int argc, char **argv) {
     struct sockaddr_in server_addr;
 
     init_connection(&s_socket, &server_addr, ip);
-
     exchange_protocol_version(s_socket);
+
     algorithm_negotiation(s_socket);
-    key_exchange(s_socket);
+//    key_exchange(s_socket);
 
     close(s_socket);
     return 0;
