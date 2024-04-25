@@ -40,7 +40,7 @@ void init_connection(int *s_socket, struct sockaddr_in *server_addr, char *ip) {
 }
 
 void exchange_protocol_version(int s_socket) {
-    char *handshake_message = "SSH-2.0-1.0\r\n";
+    char *handshake_message = "SSH-2.0-OpenSSH_for_Windows_8.6\r\n";
     ssize_t size;
     size = send(s_socket, handshake_message, 13, 0);
 
