@@ -30,6 +30,23 @@ size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte 
     return total_length;
 }
 
+void serialize_packet(const Packet *packet, byte *buffer) {
+    uint32_t netlong = htonl(packet->packet_length);
+    memcpy(buffer, &netlong, sizeof(uint32_t));
+    buffer += sizeof(uint32_t);
+
+    memcpy(buffer, &packet->padding_length, sizeof(byte));
+    buffer += sizeof(byte);
+
+    size_t payload_size = packet->packet_length - packet->padding_length - 1;
+    memcpy(buffer, packet->payload, payload_size);
+    buffer += payload_size;
+
+    memcpy(buffer, packet->random_padding, packet->padding_length);
+
+    // TODO: serialize mac
+}
+
 void deserialize_packet(const byte *buffer, Packet *packet) {
     packet->packet_length = htonl(*((uint32_t *) buffer));
     memcpy(&packet->padding_length, buffer + sizeof(uint32_t), sizeof(byte));

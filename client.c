@@ -72,8 +72,9 @@ void exchange_protocol_version(int s_socket) {
 void algorithm_negotiation(int s_socket) {
     KEXINIT kexinit_client;
     size_t kexinit_size = fill_kexinit(&kexinit_client);
-    // FIXME: serialize KEXINIT properly
-    send_data_in_packet(s_socket, (byte *) &kexinit_client, kexinit_size);
+    byte *buffer = malloc(kexinit_size);
+    serialize_KEXINIT(&kexinit_client, buffer);
+    send_data_in_packet(s_socket, buffer, kexinit_size);
 
     Packet server_packet;
     size_t size = recv(s_socket, packet_buffer, MAX_PACKET_SIZE, 0);
@@ -85,7 +86,6 @@ void algorithm_negotiation(int s_socket) {
     }
 
     deserialize_packet(packet_buffer, &server_packet);
-
     KEXINIT kexinit_server;
     deserialize_KEXINIT(server_packet.payload, &kexinit_server);
 }
@@ -93,13 +93,20 @@ void algorithm_negotiation(int s_socket) {
 void key_exchange(int s_socket) {
     DEKEXINIT dekexinit;
     fill_dekexinit(&dekexinit);
-    send_data_in_packet(s_socket, &dekexinit, sizeof(DEKEXINIT));
+    byte *buffer = malloc(sizeof(DEKEXINIT));
+    serialize_dekexinit(&dekexinit, buffer);
+    send_data_in_packet(s_socket, buffer, sizeof(DEKEXINIT));
 
     Packet dekex_reply_packet;
     ssize_t size = recv(s_socket, packet_buffer, MAX_PACKET_SIZE, 0);
+
+    if (size == -1) {
+        close(s_socket);
+        fprintf(stderr, "ERROR: failed to receive a DEKEXREPLY packet\n");
+        exit(1);
+    }
+
     deserialize_packet(packet_buffer, &dekex_reply_packet);
-    printf("Size: %d\n", size);
-    printf("Packet length: %d\n", dekex_reply_packet.packet_length);
 }
 
 int main(int argc, char **argv) {

@@ -20,4 +20,6 @@ typedef struct {
 
 void fill_dekexinit(DEKEXINIT *dekexinit);
 
+void serialize_dekexinit(const DEKEXINIT *dekexinit, byte *buffer);
+
 #endif //SSH_IMPLEMENTATION_DEKEX_H

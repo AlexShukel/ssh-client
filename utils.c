@@ -25,11 +25,11 @@ bool starts_with(const char *str, const char *pattern, size_t pattern_size) {
 }
 
 void send_data_in_packet(int s_socket, byte *data, size_t data_size) {
-    printf("Sending packet with data of size: %d\n", data_size);
     Packet packet;
     size_t packet_size = fill_packet(&packet, data, data_size, NULL);
-
-    size_t size = send(s_socket, &packet, packet_size, 0);
+    byte *buffer = malloc(packet_size);
+    serialize_packet(&packet, buffer);
+    size_t size = send(s_socket, buffer, packet_size, 0);
 
     if (size == -1) {
         close(s_socket);
