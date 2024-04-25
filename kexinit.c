@@ -47,6 +47,17 @@ size_t fill_kexinit(KEXINIT *kexinit) {
            + kexinit->compression_algorithms_server_to_client_length;
 }
 
+void destroy_kexinit(KEXINIT *kexinit) {
+    free(kexinit->kex_algorithms);
+    free(kexinit->server_host_key_algorithms);
+    free(kexinit->encryption_algorithms_client_to_server);
+    free(kexinit->encryption_algorithms_server_to_client);
+    free(kexinit->mac_algorithms_client_to_server);
+    free(kexinit->mac_algorithms_server_to_client);
+    free(kexinit->compression_algorithms_client_to_server);
+    free(kexinit->compression_algorithms_server_to_client);
+}
+
 #define SERIALIZE_ALGORITHMS_STRING(name, kexinit, buffer) \
         netlong = htonl(kexinit->name##_length); \
         memcpy(buffer, &netlong, sizeof(uint32_t)); \

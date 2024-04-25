@@ -39,6 +39,8 @@ typedef struct {
 
 size_t fill_kexinit(KEXINIT *kexinit);
 
+void destroy_kexinit(KEXINIT *kexinit);
+
 void serialize_KEXINIT(const KEXINIT *kexinit, byte *buffer);
 
 void deserialize_KEXINIT(const byte *buffer, KEXINIT *kexinit);

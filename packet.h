@@ -24,6 +24,8 @@ typedef struct {
 
 size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte *mac);
 
+void destroy_packet(Packet *packet);
+
 void serialize_packet(const Packet *packet, byte *buffer);
 
 void deserialize_packet(const byte *buffer, Packet *packet);

@@ -36,4 +36,6 @@ void send_data_in_packet(int s_socket, byte *data, size_t data_size) {
         fprintf(stderr, "ERROR: failed to receive a KEXINIT packet\n");
         exit(1);
     }
+
+    destroy_packet(&packet);
 }

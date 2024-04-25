@@ -12,11 +12,11 @@
 size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte *mac) {
     // Calculate padding length to make the total length a multiple of 8
     byte block_size = 8; // Block size, assuming 8 for example
-    size_t total_length = sizeof(uint32_t) + sizeof(byte) + payload_length + packet->padding_length + block_size;
+    size_t total_length = sizeof(uint32_t) + sizeof(byte) + payload_length;
     uint32_t padding_length = block_size - (total_length % block_size);
 
     // Fill packet fields
-    packet->packet_length = payload_length + packet->padding_length + padding_length + sizeof(uint32_t) + sizeof(byte);
+    packet->packet_length = payload_length + padding_length + sizeof(byte);
     packet->padding_length = padding_length;
     packet->payload = payload;
     packet->mac = mac;
@@ -28,6 +28,11 @@ size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte 
     }
 
     return total_length;
+}
+
+void destroy_packet(Packet *packet) {
+    free(packet->payload);
+    free(packet->random_padding);
 }
 
 void serialize_packet(const Packet *packet, byte *buffer) {
