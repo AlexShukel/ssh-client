@@ -5,13 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "packet.h"
 #include <netinet/in.h>
 #include "packet.h"
 #include "utils.h"
 
-size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte *mac) {
     // Calculate padding length to make the total length a multiple of 8
+size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte *mac) {
     byte block_size = 8; // Block size, assuming 8 for example
+//    uint32_t padding_length = (block_size - (total_length % block_size)) % block_size;
     size_t total_length = sizeof(uint32_t) + sizeof(byte) + payload_length;
     uint32_t padding_length = block_size - (total_length % block_size);
 
@@ -24,10 +26,12 @@ size_t fill_packet(Packet *packet, byte *payload, uint32_t payload_length, byte 
     // Generate random padding
     packet->random_padding = (byte *) malloc(padding_length * sizeof(byte));
     for (int i = 0; i < padding_length; i++) {
-        packet->random_padding[i] = rand() % 256; // Fill with random bytes (0-255)
+//        packet->random_padding[i] = rand() % 256; // Fill with random bytes (0-255)
+        // TODO: generate random bytes here
+        packet->random_padding[i] = 0;
     }
 
-    return total_length;
+    return total_length + padding_length;
 }
 
 void destroy_packet(Packet *packet) {
@@ -52,7 +56,7 @@ void serialize_packet(const Packet *packet, byte *buffer) {
     // TODO: serialize mac
 }
 
-void deserialize_packet(const byte *buffer, Packet *packet) {
+size_t deserialize_packet(const byte *buffer, Packet *packet) {
     packet->packet_length = htonl(*((uint32_t *) buffer));
     memcpy(&packet->padding_length, buffer + sizeof(uint32_t), sizeof(byte));
 
@@ -64,4 +68,5 @@ void deserialize_packet(const byte *buffer, Packet *packet) {
     memcpy(packet->random_padding, buffer + sizeof(uint32_t) + sizeof(byte) + payload_size, packet->padding_length);
 
     // TODO: deserialize mac
+    return packet->packet_length + sizeof(uint32_t);
 }

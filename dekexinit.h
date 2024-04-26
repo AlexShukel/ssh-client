@@ -18,7 +18,7 @@ typedef struct {
     byte ephemeral_key[KEY_LEN];
 } DEKEXINIT;
 
-void fill_dekexinit(DEKEXINIT *dekexinit);
+size_t fill_dekexinit(DEKEXINIT *dekexinit);
 
 void serialize_dekexinit(const DEKEXINIT *dekexinit, byte *buffer);
 

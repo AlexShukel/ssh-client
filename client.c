@@ -13,6 +13,8 @@
 #include "kexinit.h"
 #include "utils.h"
 #include "dekexinit.h"
+#include "dekexreply.h"
+#include "newkeys.h"
 
 #define PORT 22
 
@@ -40,7 +42,7 @@ void init_connection(int *s_socket, struct sockaddr_in *server_addr, char *ip) {
 }
 
 void exchange_protocol_version(int s_socket) {
-    char handshake_message[] = "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.7\r\n";
+    char handshake_message[] = "SSH-2.0-OpenSSH_for_Windows_8.6\r\n";
     ssize_t size;
     size = send(s_socket, handshake_message, sizeof(handshake_message) - 1, 0);
 
@@ -98,21 +100,28 @@ void algorithm_negotiation(int s_socket) {
 
 void key_exchange(int s_socket) {
     DEKEXINIT dekexinit;
-    fill_dekexinit(&dekexinit);
-    byte *buffer = malloc(sizeof(DEKEXINIT));
+    size_t dekexinit_size = fill_dekexinit(&dekexinit);
+    byte *buffer = malloc(dekexinit_size);
     serialize_dekexinit(&dekexinit, buffer);
-    send_data_in_packet(s_socket, buffer, sizeof(DEKEXINIT));
+    send_data_in_packet(s_socket, buffer, dekexinit_size);
 
     Packet dekex_reply_packet;
-    ssize_t size = recv(s_socket, packet_buffer, 3 * MAX_PACKET_SIZE, 0);
-
+    ssize_t size = recv(s_socket, packet_buffer, MAX_PACKET_SIZE, 0);
     if (size == -1) {
         close(s_socket);
         fprintf(stderr, "ERROR: failed to receive a DEKEXREPLY packet\n");
         exit(1);
     }
+    size_t dekex_reply_packet_size = deserialize_packet(packet_buffer, &dekex_reply_packet);
+    DEKEXREPLY dekexreply;
+    deserialize_DEKEXREPLY(dekex_reply_packet.payload, &dekexreply);
 
-    deserialize_packet(packet_buffer, &dekex_reply_packet);
+    Packet new_keys_packet;
+    deserialize_packet(packet_buffer + dekex_reply_packet_size, &new_keys_packet);
+    NEWKEYS newkeys;
+    deserialize_NEWKEYS(new_keys_packet.payload, &newkeys);
+
+    
 }
 
 int main(int argc, char **argv) {
@@ -125,7 +134,7 @@ int main(int argc, char **argv) {
     exchange_protocol_version(s_socket);
 
     algorithm_negotiation(s_socket);
-//    key_exchange(s_socket);
+    key_exchange(s_socket);
 
     close(s_socket);
     return 0;

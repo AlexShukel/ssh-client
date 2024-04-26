@@ -28,6 +28,6 @@ void destroy_packet(Packet *packet);
 
 void serialize_packet(const Packet *packet, byte *buffer);
 
-void deserialize_packet(const byte *buffer, Packet *packet);
+size_t deserialize_packet(const byte *buffer, Packet *packet);
 
 #endif //SSH_IMPLEMENTATION_PACKET_H
